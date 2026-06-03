@@ -378,7 +378,11 @@ function App() {
             <span>100% client-side processing — your files never leave your device.</span>
           </div>
           <div className="footer-built">
-            Built with React + FFmpeg.wasm &nbsp;·&nbsp; No servers &nbsp;·&nbsp; No tracking
+            <span>Your advice matters.</span>
+            <span className="footer-dot">·</span>
+            <span>Contact{' '}
+              <a href="mailto:dgutyang@gmail.com" className="footer-email">Donnie</a>
+            </span>
           </div>
         </div>
       </footer>
