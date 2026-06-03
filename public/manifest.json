@@ -1,0 +1,66 @@
+{
+    "name": "Audio Loudness Processor",
+    "short_name": "Audio Loudness",
+    "description": "Process and adjust audio loudness in videos using FFmpeg. Works offline on iOS.",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait-primary",
+    "background_color": "#ffffff",
+    "theme_color": "#1f2937",
+    "scope": "/",
+    "categories": [
+        "productivity",
+        "utilities"
+    ],
+    "screenshots": [
+        {
+            "src": "/icons/screenshot-540x720.png",
+            "sizes": "540x720",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/screenshot-1284x2778.png",
+            "sizes": "1284x2778",
+            "type": "image/png",
+            "form_factor": "wide",
+            "purpose": "any"
+        }
+    ],
+    "icons": [
+        {
+            "src": "/icons/icon-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/apple-touch-icon-180x180.png",
+            "sizes": "180x180",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Upload Video",
+            "short_name": "Upload",
+            "description": "Upload a video to adjust audio loudness",
+            "url": "/?action=upload",
+            "icons": [
+                {
+                    "src": "/icons/icon-192x192.png",
+                    "sizes": "192x192",
+                    "type": "image/png"
+                }
+            ]
+        }
+    ]
+}
