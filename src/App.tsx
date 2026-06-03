@@ -172,13 +172,27 @@ function App() {
     }
   }
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!processedFile || !uploadedFile) return
 
+    const fileName = `processed_${uploadedFile.file.name}`
+    const file = new File([processedFile], fileName, { type: processedFile.type || 'video/mp4' })
+
+    // Use Share API if available (iOS shows "Save Video" → Photos, Android shows share sheet)
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] })
+        return
+      } catch {
+        // User cancelled or share failed — fall through to download fallback
+      }
+    }
+
+    // Fallback: direct download via anchor (desktop, older browsers)
     const url = URL.createObjectURL(processedFile)
     const a = document.createElement('a')
     a.href = url
-    a.download = `processed_${uploadedFile.file.name}`
+    a.download = fileName
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

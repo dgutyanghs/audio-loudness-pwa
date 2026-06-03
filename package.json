@@ -1,6 +1,6 @@
 {
   "name": "audio-loudness-pwa",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -8,7 +8,9 @@
     "preview": "vite preview",
     "test": "vitest",
     "lint": "eslint src --ext ts,tsx",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=audio-loudness-normalizer",
+    "deploy:preview": "npm run build && wrangler pages deploy dist --project-name=audio-loudness-normalizer --branch=preview"
   },
   "dependencies": {
     "@ffmpeg/core-mt": "^0.12.6",
@@ -30,6 +32,7 @@
     "vite": "^5.0.8",
     "vitest": "^1.1.0",
     "workbox-cli": "^7.0.0",
-    "workbox-window": "^7.0.0"
+    "workbox-window": "^7.0.0",
+    "wrangler": "^3.114.17"
   }
 }
