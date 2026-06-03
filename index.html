@@ -3,23 +3,59 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- PWA & iPhone Configuration -->
-    <meta name="theme-color" content="#1f2937" />
+
+    <!-- ═══════════ SEO ─────────────────────── -->
+    <title>Audio Loudness Normalizer — Adjust Video Audio Levels Privately in Your Browser</title>
+    <meta name="description" content="Normalize video audio loudness to broadcast standards (EBU R128) right in your browser. 100% private — your files never leave your device. No uploads, no servers, just FFmpeg.wasm running locally. Free, fast, works offline." />
+    <meta name="keywords" content="audio loudness normalizer, video audio leveler, LUFS normalization, EBU R128, loudnorm, FFmpeg wasm, browser audio processor, private video editor, offline audio tool, loudness adjustment, audio post-production, streaming loudness standard" />
+    <meta name="author" content="Audio Loudness Normalizer" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://audioloudness.app" />
+
+    <!-- ═══════════ Open Graph ──────────────── -->
+    <meta property="og:title" content="Audio Loudness Normalizer — Private, Browser-Based Video Audio Processing" />
+    <meta property="og:description" content="Adjust your video's audio loudness to streaming and broadcast standards. Everything runs locally on your device — your files are never uploaded anywhere." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://audioloudness.app" />
+    <meta property="og:site_name" content="Audio Loudness Normalizer" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ═══════════ Twitter Card ────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Audio Loudness Normalizer — Private Browser-Based Processing" />
+    <meta name="twitter:description" content="Normalize video audio loudness to EBU R128 and other standards. 100% client-side — your files stay on your device." />
+
+    <!-- ═══════════ PWA & iPhone ────────────── -->
+    <meta name="theme-color" content="#667eea" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Audio Loudness" />
-    
-    <!-- iPhone 14 Plus Splash Screens -->
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180x180.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png" />
     <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
     <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Preconnect to FFmpeg CDN (optional, for faster loading) -->
+
+    <!-- ═══════════ Performance ─────────────── -->
     <link rel="preconnect" href="https://cdn.jsdelivr.net/" crossorigin />
-    
-    <title>Audio Loudness - Video & Audio Processor</title>
+
+    <!-- ═══════════ Structured Data ─────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Audio Loudness Normalizer",
+      "url": "https://audioloudness.app",
+      "description": "Normalize video audio loudness to broadcast standards — entirely in your browser. No uploads, fully private.",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "browserRequirements": "Requires a modern browser with WebAssembly and SharedArrayBuffer support"
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>

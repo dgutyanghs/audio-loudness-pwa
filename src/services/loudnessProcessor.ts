@@ -118,14 +118,15 @@ class LoudnessProcessor {
     }
 
     /**
-     * Analyze loudness of a video file without modification
+     * Analyze loudness of a video file without modification.
+     * Runs a first-pass loudnorm measurement and returns the detected
+     * integrated LUFS, true peak, and loudness range.
      */
     async analyze(
-        _videoFile: Blob,
-        _fileName: string,
+        videoFile: Blob,
+        fileName: string,
         onProgress?: (progress: number) => void
     ): Promise<{ integrated: number; truePeak: number; lra: number }> {
-        // Initialize FFmpeg if needed
         if (!ffmpegService.isReady()) {
             onProgress?.(5)
             await ffmpegService.init()
@@ -133,14 +134,11 @@ class LoudnessProcessor {
 
         onProgress?.(10)
 
-        // For analysis, we would use loudnorm filter with print_format=json
-        // and parse the output, but for now return sensible defaults
+        const result = await ffmpegService.runAnalysis(videoFile, fileName)
+
         onProgress?.(95)
-        return {
-            integrated: -16,
-            truePeak: -2.5,
-            lra: 11,
-        }
+
+        return result
     }
 
     /**

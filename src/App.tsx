@@ -32,6 +32,8 @@ function App() {
   const [selectedLoudness, setSelectedLoudness] = useState<LoudnessPreset>('-12db')
   const [isProcessing, setIsProcessing] = useState(false)
   const [processedFile, setProcessedFile] = useState<Blob | null>(null)
+  const [detectedLoudness, setDetectedLoudness] = useState<{ integrated: number; truePeak: number; lra: number } | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
 
   // Chunked upload state
   const uploadManager = useChunkedUpload()
@@ -79,6 +81,20 @@ function App() {
         size: formatFileSize(file.size),
       })
       setProcessedFile(null)
+
+      // Analyze the current loudness of the uploaded video
+      setIsAnalyzing(true)
+      setDetectedLoudness(null)
+      try {
+        const fileBlob = await uploadManager.reassemble(uploadId)
+        const analysis = await loudnessProcessor.analyze(fileBlob, file.name)
+        setDetectedLoudness(analysis)
+      } catch (analyzeErr) {
+        console.error('Loudness analysis failed:', analyzeErr)
+        // Non-critical — don't block the user
+      } finally {
+        setIsAnalyzing(false)
+      }
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Upload failed'
       setError(`❌ Upload failed: ${errorMsg}`)
@@ -115,6 +131,7 @@ function App() {
     setError(null)
     setProcessedFile(null)
     setIsProcessing(false)
+    setDetectedLoudness(null)
   }
 
   const handleProcessStart = async () => {
@@ -172,7 +189,7 @@ function App() {
     <div className="App">
       <header className="app-header">
         <h1>🔊 Audio Loudness Processor</h1>
-        <p>Adjust audio loudness in videos using FFmpeg • Works offline on iOS</p>
+        <p>Adjust audio loudness in videos • Works offline</p>
       </header>
 
       <main className="app-main">
@@ -231,6 +248,22 @@ function App() {
                 <p><strong>Size:</strong> {uploadedFile.size}</p>
                 <p><strong>Type:</strong> {uploadedFile.file.type || 'video'}</p>
               </div>
+
+              {isAnalyzing ? (
+                <div className="detected-loudness analyzing">
+                  <span className="dl-spinner" />
+                  <span>Analyzing audio loudness…</span>
+                </div>
+              ) : detectedLoudness ? (
+                <div className="detected-loudness">
+                  <span className="dl-icon">🎚️</span>
+                  <div className="dl-values">
+                    <span className="dl-main">Current loudness: <strong>{detectedLoudness.integrated} LUFS</strong></span>
+                    <span className="dl-sub">True peak: {detectedLoudness.truePeak} dB &nbsp;·&nbsp; LRA: {detectedLoudness.lra} LU</span>
+                  </div>
+                </div>
+              ) : null}
+
               <button onClick={resetUpload} className="btn-secondary">
                 📤 Upload Different File
               </button>
@@ -241,6 +274,12 @@ function App() {
 
         <section className="controls-section">
           <h2>Audio Controls</h2>
+
+          <div className="loudness-tip">
+            <span className="tip-icon">💡</span>
+            <span>Loudness normalization won't cause sound distortion — not like volume adjustment.</span>
+          </div>
+
           {uploadedFile && !processedFile ? (
             <div className="loudness-controls">
               <h3>Select Target Loudness</h3>
@@ -250,7 +289,7 @@ function App() {
                     key={option.value}
                     className={`loudness-option ${selectedLoudness === option.value ? 'active' : ''}`}
                     onClick={() => setSelectedLoudness(option.value)}
-                    disabled={isProcessing}
+                    disabled={isProcessing || isAnalyzing}
                   >
                     <div className="option-label">{option.label}</div>
                     <div className="option-desc">{option.description}</div>
@@ -271,10 +310,12 @@ function App() {
               <button
                 onClick={handleProcessStart}
                 className={`btn-primary ${isProcessing ? 'processing' : ''}`}
-                disabled={isProcessing}
+                disabled={isProcessing || isAnalyzing}
               >
                 {isProcessing ? (
                   <>⚙️ Processing with FFmpeg...</>
+                ) : isAnalyzing ? (
+                  <>🔍 Analyzing audio loudness...</>
                 ) : (
                   <>🚀 Process Video</>
                 )}
@@ -303,6 +344,15 @@ function App() {
           )}
         </section>
 
+        <section className="privacy-notice">
+          <div className="privacy-content">
+            <span className="privacy-icon">🔒</span>
+            <div className="privacy-text">
+              <strong>Your privacy matters.</strong> Everything runs <em>right here in your browser</em> — your videos and audio are never uploaded to any server. Once you close this page, all data is gone. No accounts, no tracking, no storage. Just fast, private, local processing.
+            </div>
+          </div>
+        </section>
+
         <section className="status-section">
           <h2>Status</h2>
           <p>
@@ -322,7 +372,15 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>Built with React + FFmpeg.wasm | iOS PWA | Phase 4: Real FFmpeg Integration ✅</p>
+        <div className="footer-content">
+          <div className="footer-privacy">
+            <span>🔒</span>
+            <span>100% client-side processing — your files never leave your device.</span>
+          </div>
+          <div className="footer-built">
+            Built with React + FFmpeg.wasm &nbsp;·&nbsp; No servers &nbsp;·&nbsp; No tracking
+          </div>
+        </div>
       </footer>
     </div>
   )

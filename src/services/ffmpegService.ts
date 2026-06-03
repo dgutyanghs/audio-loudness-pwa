@@ -10,6 +10,7 @@ class FFmpegService {
     private ffmpeg: FFmpeg | null = null
     private initialized = false
     private initPromise: Promise<void> | null = null
+    private abortAnalysis: AbortController | null = null
 
     /**
      * Initialize FFmpeg with multi-threaded WebWorker support.
@@ -74,6 +75,9 @@ class FFmpegService {
             throw new Error('FFmpeg not initialized')
         }
 
+        // Cancel any in-flight analysis before processing
+        this.cancelRunningAnalysis()
+
         try {
             // Write input file to FFmpeg's virtual file system
             const uint8Array = new Uint8Array(await inputFile.arrayBuffer())
@@ -104,6 +108,114 @@ class FFmpegService {
      */
     isReady(): boolean {
         return this.initialized && this.ffmpeg?.loaded === true
+    }
+
+    /**
+     * Cancel any running analysis (called before a new analysis or processing starts).
+     */
+    cancelRunningAnalysis(): void {
+        if (this.abortAnalysis) {
+            this.abortAnalysis.abort()
+            this.abortAnalysis = null
+        }
+    }
+
+    /**
+     * Analyze audio loudness using a first-pass loudnorm measurement.
+     * Runs FFmpeg on a short segment to trigger loudnorm JSON output,
+     * then parses the measured values from the captured logs.
+     */
+    async runAnalysis(
+        inputFile: Blob,
+        fileName: string
+    ): Promise<{ integrated: number; truePeak: number; lra: number }> {
+        if (!this.ffmpeg || !this.initialized) {
+            throw new Error('FFmpeg not initialized')
+        }
+
+        // Cancel any in-flight analysis
+        this.cancelRunningAnalysis()
+
+        const abort = new AbortController()
+        this.abortAnalysis = abort
+
+        const logs: string[] = []
+        const logHandler = ({ message }: { message: string }) => {
+            logs.push(message)
+        }
+
+        this.ffmpeg.on('log', logHandler)
+
+        const analysisOutput = '__analysis_tmp.mp4'
+
+        try {
+            // Write input file
+            const uint8Array = new Uint8Array(await inputFile.arrayBuffer())
+            if (abort.signal.aborted) return { integrated: 0, truePeak: 0, lra: 0 }
+            await this.ffmpeg.writeFile(fileName, uint8Array)
+
+            // Run loudnorm analysis — audio only, first 5 seconds (fast regardless of file size).
+            // The loudnorm filter prints JSON to stderr with input_i, input_tp, input_lra.
+            await this.ffmpeg.exec([
+                '-i', fileName,
+                '-af', 'loudnorm=I=-16:TP=-3:LRA=11:print_format=json',
+                '-t', '5',             // analyze first 5 seconds only
+                '-vn',                 // skip video entirely
+                '-c:a', 'aac',
+                '-b:a', '64k',
+                '-y',
+                analysisOutput,
+            ])
+
+            if (abort.signal.aborted) return { integrated: 0, truePeak: 0, lra: 0 }
+
+            // Parse the loudnorm JSON from captured logs.
+            // The JSON is printed across multiple log lines:
+            //   [Parsed_loudnorm_0 @ ...]
+            //   {
+            //       "input_i" : "-21.09",
+            //       ...
+            //   }
+            // We need to collect the lines between { and } and parse the full object.
+            const jsonLines: string[] = []
+            let inJson = false
+
+            for (const log of logs) {
+                if (!inJson && log.trim() === '{') {
+                    inJson = true
+                    jsonLines.length = 0
+                    jsonLines.push('{')
+                } else if (inJson) {
+                    jsonLines.push(log)
+                    if (log.trim() === '}') {
+                        break
+                    }
+                }
+            }
+
+            if (jsonLines.length > 0) {
+                try {
+                    const parsed = JSON.parse(jsonLines.join('\n'))
+                    if (parsed.input_i !== undefined) {
+                        return {
+                            integrated: Math.round(parseFloat(parsed.input_i) * 100) / 100,
+                            truePeak: Math.round(parseFloat(parsed.input_tp) * 100) / 100,
+                            lra: Math.round(parseFloat(parsed.input_lra) * 100) / 100,
+                        }
+                    }
+                } catch {
+                    // JSON parse failed — fall through to fallback
+                }
+            }
+
+            // Fallback if no JSON found in logs
+            return { integrated: 0, truePeak: 0, lra: 0 }
+        } finally {
+            this.ffmpeg.off('log', logHandler)
+            this.abortAnalysis = null
+            await this.ffmpeg.deleteFile(fileName).catch(() => {})
+            await this.ffmpeg.deleteFile(analysisOutput).catch(() => {})
+        }
     }
 
     /**
