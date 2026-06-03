@@ -29,7 +29,7 @@ function App() {
   const [uploadedFile, setUploadedFile] = useState<FileInfo | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedLoudness, setSelectedLoudness] = useState<LoudnessPreset>('-23db')
+  const [selectedLoudness, setSelectedLoudness] = useState<LoudnessPreset>('-12db')
   const [isProcessing, setIsProcessing] = useState(false)
   const [processedFile, setProcessedFile] = useState<Blob | null>(null)
 

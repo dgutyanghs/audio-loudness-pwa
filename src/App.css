@@ -368,3 +368,264 @@ body {
 .storage-info p:last-child {
     margin-bottom: 0;
 }
+
+/* ══════════════════════════════════════════
+   Loudness Option Cards
+   ══════════════════════════════════════════ */
+
+.loudness-controls h3 {
+    margin: 0 0 1rem;
+    color: #374151;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.loudness-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.loudness-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.25rem 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #fafbfc 0%, #f3f4f6 100%);
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: inherit;
+    outline: none;
+    min-height: 44px;
+}
+
+.loudness-option:hover {
+    border-color: #a5b4fc;
+    background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.18);
+}
+
+.loudness-option:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(102, 126, 234, 0.12);
+}
+
+.loudness-option.active {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.35), 0 0 0 4px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.loudness-option.active:hover {
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.45), 0 0 0 4px rgba(102, 126, 234, 0.15);
+    background: linear-gradient(135deg, #7c6ff7 0%, #8b5cf6 100%);
+}
+
+.loudness-option:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.option-label {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: -0.01em;
+    transition: color 0.2s ease;
+}
+
+.loudness-option.active .option-label {
+    color: white;
+}
+
+.option-desc {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: 0.25rem;
+    transition: color 0.2s ease;
+}
+
+.loudness-option:hover .option-desc {
+    color: #6b7280;
+}
+
+.loudness-option.active .option-desc {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.option-lufs {
+    margin-top: 0.6rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.loudness-option.active .option-lufs {
+    color: white;
+    background: rgba(255, 255, 255, 0.18);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Selected info bar */
+.processing-info {
+    margin-bottom: 1.25rem;
+}
+
+.selected-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+}
+
+.selected-info p {
+    margin: 0;
+    color: #0369a1 !important;
+    font-size: 0.9rem;
+}
+
+.selected-info p small {
+    color: #0284c7;
+    font-size: 0.8rem;
+}
+
+/* ══════════════════════════════════════════
+   Process Button
+   ══════════════════════════════════════════ */
+
+.btn-primary {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 48px;
+    letter-spacing: 0.01em;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #7c6ff7 0%, #8b5cf6 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
+}
+
+.btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-primary.processing {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+    animation: pulse-border 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% {
+        box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+    }
+    50% {
+        box-shadow: 0 4px 28px rgba(245, 158, 11, 0.5), 0 0 0 6px rgba(245, 158, 11, 0.08);
+    }
+}
+
+/* ══════════════════════════════════════════
+   Processing Complete & Download
+   ══════════════════════════════════════════ */
+
+.processing-complete {
+    text-align: center;
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.processing-complete h3 {
+    margin: 0 0 0.5rem;
+    color: #059669;
+    font-size: 1.2rem;
+}
+
+.processing-complete p {
+    color: #6b7280 !important;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-download {
+    width: 100%;
+    padding: 0.9rem 1.5rem;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 48px;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.btn-download:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+}
+
+.btn-download:active {
+    transform: translateY(0);
+}
+
+/* ══════════════════════════════════════════
+   Responsive fine-tuning
+   ══════════════════════════════════════════ */
+
+@media (max-width: 480px) {
+    .loudness-options {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+
+    .loudness-option {
+        padding: 1rem 0.5rem 0.75rem;
+    }
+
+    .option-label {
+        font-size: 0.9rem;
+    }
+}
