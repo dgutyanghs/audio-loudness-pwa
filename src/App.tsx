@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import { useChunkedUpload } from './hooks/useChunkedUpload'
 import { loudnessProcessor } from './services/loudnessProcessor'
+import { InstallGuide, useIsInstalled } from './components/InstallGuide'
 
 interface FileInfo {
   file: File
@@ -34,6 +35,8 @@ function App() {
   const [processedFile, setProcessedFile] = useState<Blob | null>(null)
   const [detectedLoudness, setDetectedLoudness] = useState<{ integrated: number; truePeak: number; lra: number } | null>(null)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [showInstallGuide, setShowInstallGuide] = useState(false)
+  const isInstalled = useIsInstalled()
 
   // Chunked upload state
   const uploadManager = useChunkedUpload()
@@ -193,6 +196,17 @@ function App() {
       </header>
 
       <main className="app-main">
+        {/* Install banner — shown only when not already installed */}
+        {!isInstalled && (
+          <div className="install-banner" onClick={() => setShowInstallGuide(true)}>
+            <span className="install-banner-icon">📲</span>
+            <span className="install-banner-text">
+              Install this app to your home screen for the best experience — full screen, offline, auto‑updating.
+            </span>
+            <span className="install-banner-arrow">›</span>
+          </div>
+        )}
+
         <section className="upload-section">
           <h2>Upload Video</h2>
           {!uploadedFile ? (
@@ -386,6 +400,8 @@ function App() {
           </div>
         </div>
       </footer>
+
+      <InstallGuide isOpen={showInstallGuide} onClose={() => setShowInstallGuide(false)} />
     </div>
   )
 }

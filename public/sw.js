@@ -1,74 +1,90 @@
 /**
- * Basic Service Worker for offline support
- * Will be enhanced with Workbox in Phase 6
+ * Service Worker — PWA offline + auto-update
+ *
+ * Strategy:
+ *  - HTML: network-first (always check for new version, cache as fallback)
+ *  - Static assets (JS/CSS/WASM): cache-first (they have content hashes)
+ *  - Auto-update: skipWaiting + clients.claim on new version
+ *  - Old caches purged on activate
  */
 
-const CACHE_NAME = 'audio-loudness-v1'
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-]
+const CACHE_VERSION = 'v2'
+const CACHE_NAME = `audio-loudness-${CACHE_VERSION}`
 
+// ── Install: pre-cache app shell ──────────────────
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            console.log('Caching app shell')
-            return cache.addAll(urlsToCache).catch(() => {
-                console.log('Some assets failed to cache during install')
-            })
-        })
-    )
+  console.log(`[SW] Installing ${CACHE_NAME}...`)
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(['/', '/index.html', '/manifest.json']).catch((err) => {
+        console.warn('[SW] Pre-cache partial failure:', err)
+      })
+    })
+  )
+  // Take control immediately — don't wait for tabs to close
+  self.skipWaiting()
 })
 
+// ── Activate: purge old caches, claim clients ─────
 self.addEventListener('activate', (event) => {
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cacheName)
-                        return caches.delete(cacheName)
-                    }
-                })
-            )
-        })
-    )
+  console.log(`[SW] Activating ${CACHE_NAME}...`)
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => {
+            console.log(`[SW] Deleting old cache: ${key}`)
+            return caches.delete(key)
+          })
+      )
+    })
+    .then(() => self.clients.claim())
+    .then(() => console.log('[SW] Ready — all clients claimed'))
+  )
 })
 
+// ── Fetch: network-first HTML, cache-first assets ──
 self.addEventListener('fetch', (event) => {
-    // Only cache GET requests
-    if (event.request.method !== 'GET') {
-        return
-    }
+  if (event.request.method !== 'GET') return
 
+  const url = new URL(event.request.url)
+
+  // Network-first for page navigations (HTML)
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-        caches.match(event.request).then((response) => {
-            // Cache hit - return response
-            if (response) {
-                return response
-            }
-
-            return fetch(event.request)
-                .then((response) => {
-                    // Check if valid response
-                    if (!response || response.status !== 200 || response.type !== 'basic') {
-                        return response
-                    }
-
-                    // Clone the response
-                    const responseToCache = response.clone()
-
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseToCache)
-                    })
-
-                    return response
-                })
-                .catch(() => {
-                    // Return cached response if fetch fails
-                    return caches.match('/index.html')
-                })
+      fetch(event.request)
+        .then((response) => {
+          // Cache the fresh response
+          const cloned = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned))
+          return response
+        })
+        .catch(() => {
+          // Offline — serve cached page
+          return caches.match(event.request).then((cached) => cached || caches.match('/index.html'))
         })
     )
+    return
+  }
+
+  // Cache-first for static assets (JS, CSS, WASM, icons)
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached
+
+      return fetch(event.request).then((response) => {
+        // Only cache successful same-origin responses
+        if (response.status === 200 && url.origin === self.location.origin) {
+          const cloned = response.clone()
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cloned))
+        }
+        return response
+      })
+      .catch(() => {
+        // Offline and not in cache — nothing we can do
+        return new Response('Offline — resource not cached', { status: 503 })
+      })
+    })
+  )
 })

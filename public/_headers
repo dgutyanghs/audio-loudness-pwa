@@ -1,0 +1,6 @@
+# Cloudflare Pages headers
+# Required for FFmpeg.wasm multi-threaded core (SharedArrayBuffer)
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: cross-origin

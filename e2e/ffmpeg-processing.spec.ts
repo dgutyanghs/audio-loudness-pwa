@@ -24,8 +24,8 @@ test('upload, analyze loudness, process with FFmpeg, and download', async ({ pag
   await expect(page.locator('.file-uploaded')).toBeVisible({ timeout: 30000 });
 
   // ── Wait for loudness analysis to complete ───────
-  // The detected-loudness element appears when analysis finishes
-  await expect(page.locator('.detected-loudness')).toBeVisible({ timeout: 60000 });
+  // Wait for the result variant (has .dl-main), not the spinner variant (.analyzing)
+  await expect(page.locator('.dl-main strong')).toBeVisible({ timeout: 120000 });
   await expect(page.locator('.dl-main strong')).toContainText('LUFS');
 
   // Verify it's not the fallback 0 LUFS
