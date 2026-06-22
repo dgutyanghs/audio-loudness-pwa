@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import './App.css'
 import { useChunkedUpload } from './hooks/useChunkedUpload'
 import { loudnessProcessor } from './services/loudnessProcessor'
+import { ffmpegService } from './services/ffmpegService'
 import { InstallGuide, useIsInstalled } from './components/InstallGuide'
 
 interface FileInfo {
@@ -10,7 +11,7 @@ interface FileInfo {
   duration?: number
 }
 
-type LoudnessPreset = '-10db' | '-12db' | '-16db' | '-23db'
+type LoudnessPreset = '-8db' | '-10db' | '-12db' | '-16db'
 
 interface LoudnessOption {
   value: LoudnessPreset
@@ -20,10 +21,10 @@ interface LoudnessOption {
 }
 
 const LOUDNESS_OPTIONS: LoudnessOption[] = [
-  { value: '-10db', label: 'Loud (-10db)', description: 'Maximum loudness', lufs: '-10 LUFS' },
-  { value: '-12db', label: 'Normal (-12db)', description: 'Standard loudness', lufs: '-12 LUFS' },
-  { value: '-16db', label: 'Moderate (-16db)', description: 'Moderate loudness', lufs: '-16 LUFS' },
-  { value: '-23db', label: 'Quiet (-23db)', description: 'EBU R 128 standard', lufs: '-23 LUFS' },
+  { value: '-8db', label: 'Loud (-8db)', description: 'Maximum loudness', lufs: '-8 LUFS' },
+  { value: '-10db', label: 'Normal (-10db)', description: 'Strong loudness', lufs: '-10 LUFS' },
+  { value: '-12db', label: 'Moderate (-12db)', description: 'Standard loudness', lufs: '-12 LUFS' },
+  { value: '-16db', label: 'Quiet (-16db)', description: 'Moderate loudness', lufs: '-16 LUFS' },
 ]
 
 function App() {
@@ -40,6 +41,17 @@ function App() {
 
   // Chunked upload state
   const uploadManager = useChunkedUpload()
+
+  // ── Clean up FFmpeg worker when leaving the page ──
+  // pagehide fires on tab close, navigation, or app backgrounding on iOS.
+  // This prevents orphaned WASM workers from accumulating memory.
+  useEffect(() => {
+    const handlePageHide = () => {
+      ffmpegService.terminateWorker()
+    }
+    window.addEventListener('pagehide', handlePageHide)
+    return () => window.removeEventListener('pagehide', handlePageHide)
+  }, [])
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
@@ -66,6 +78,12 @@ function App() {
 
     try {
       setError(null)
+
+      // Clean up previous upload's IndexedDB data before starting a new one
+      const previousId = uploadManager.state.uploadId
+      if (previousId) {
+        uploadManager.cleanup(previousId).catch(() => {})
+      }
 
       // Start chunked upload
       const uploadId = await uploadManager.upload(file, {
@@ -130,11 +148,21 @@ function App() {
   }
 
   const resetUpload = () => {
+    // Free WASM memory — critical on iOS Safari to prevent memory-pressure crashes
+    ffmpegService.terminateWorker()
+
+    // Clean up IndexedDB chunks from the previous upload
+    const previousUploadId = uploadManager.state.uploadId
+    if (previousUploadId) {
+      uploadManager.cleanup(previousUploadId).catch(() => {})
+    }
+
     setUploadedFile(null)
     setError(null)
     setProcessedFile(null)
     setIsProcessing(false)
     setDetectedLoudness(null)
+    setIsAnalyzing(false)
   }
 
   const handleProcessStart = async () => {

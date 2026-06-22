@@ -219,18 +219,30 @@ class FFmpegService {
     }
 
     /**
-     * Clean up FFmpeg resources
+     * Terminate the FFmpeg Web Worker and free all WASM memory.
+     * Call this between processing sessions to prevent memory accumulation
+     * (critical on iOS Safari with its per-tab memory limits).
      */
-    async cleanup(): Promise<void> {
-        if (this.ffmpeg?.loaded) {
+    terminateWorker(): void {
+        if (this.ffmpeg) {
             try {
-                this.ffmpeg.writeFile('delete_marker.tmp', new Uint8Array())
+                this.ffmpeg.terminate()
             } catch (error) {
-                console.error('Error cleaning up FFmpeg:', error)
+                console.error('Error terminating FFmpeg worker:', error)
             }
         }
-        this.initialized = false
         this.ffmpeg = null
+        this.initialized = false
+        this.initPromise = null
+        this.abortAnalysis = null
+    }
+
+    /**
+     * Clean up FFmpeg resources. Delegates to terminateWorker()
+     * for complete memory release.
+     */
+    async cleanup(): Promise<void> {
+        this.terminateWorker()
     }
 }
 

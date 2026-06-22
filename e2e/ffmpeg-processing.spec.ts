@@ -35,7 +35,7 @@ test('upload, analyze loudness, process with FFmpeg, and download', async ({ pag
   console.log(`  ✅ Detected loudness: ${lufsValue} LUFS`);
 
   // ── Select loudness & process ────────────────────
-  await page.locator('.loudness-option').nth(3).click(); // -23db EBU R128
+  await page.locator('.loudness-option').nth(3).click(); // -16db Quiet
   await page.locator('button:has-text("Process Video")').click();
 
   // ── Wait for processing to complete ──────────────
