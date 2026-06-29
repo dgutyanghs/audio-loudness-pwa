@@ -3,6 +3,7 @@ import './App.css'
 import { loudnessProcessor } from './services/loudnessProcessor'
 import { ffmpegService } from './services/ffmpegService'
 import { InstallGuide, useIsInstalled } from './components/InstallGuide'
+import { version } from '../package.json'
 
 interface FileInfo {
   file: File
@@ -349,6 +350,8 @@ function App() {
             <span>100% client-side processing — your files never leave your device.</span>
           </div>
           <div className="footer-built">
+            <span>v{version}</span>
+            <span className="footer-dot">·</span>
             <span>Your advice matters.</span>
             <span className="footer-dot">·</span>
             <span>Contact{' '}
