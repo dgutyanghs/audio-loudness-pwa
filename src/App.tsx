@@ -11,7 +11,7 @@ interface FileInfo {
   duration?: number
 }
 
-type LoudnessPreset = '-8db' | '-10db' | '-12db' | '-16db'
+type LoudnessPreset = '-3db' | '-6db' | '-10db' | '-12db'
 
 interface LoudnessOption {
   value: LoudnessPreset
@@ -21,17 +21,17 @@ interface LoudnessOption {
 }
 
 const LOUDNESS_OPTIONS: LoudnessOption[] = [
-  { value: '-8db', label: 'Loud (-8db)', description: 'Maximum loudness', lufs: '-8 LUFS' },
-  { value: '-10db', label: 'Normal (-10db)', description: 'Strong loudness', lufs: '-10 LUFS' },
-  { value: '-12db', label: 'Moderate (-12db)', description: 'Standard loudness', lufs: '-12 LUFS' },
-  { value: '-16db', label: 'Quiet (-16db)', description: 'Moderate loudness', lufs: '-16 LUFS' },
+  { value: '-3db', label: 'Maximum (-3db)', description: 'Maximum loudness', lufs: '-3 LUFS' },
+  { value: '-6db', label: 'Strong (-6db)', description: 'Strong loudness', lufs: '-6 LUFS' },
+  { value: '-10db', label: 'Normal (-10db)', description: 'Normal loudness', lufs: '-10 LUFS' },
+  { value: '-12db', label: 'Moderate (-12db)', description: 'Moderate loudness', lufs: '-12 LUFS' },
 ]
 
 function App() {
   const [uploadedFile, setUploadedFile] = useState<FileInfo | null>(null)
   const [dragActive, setDragActive] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [selectedLoudness, setSelectedLoudness] = useState<LoudnessPreset>('-12db')
+  const [selectedLoudness, setSelectedLoudness] = useState<LoudnessPreset>('-6db')
   const [isProcessing, setIsProcessing] = useState(false)
   const [processedFile, setProcessedFile] = useState<Blob | null>(null)
   const [detectedLoudness, setDetectedLoudness] = useState<{ integrated: number; truePeak: number; lra: number } | null>(null)

@@ -5,7 +5,7 @@
 
 import { ffmpegService } from './ffmpegService'
 
-type LoudnessPreset = '-8db' | '-10db' | '-12db' | '-16db'
+type LoudnessPreset = '-3db' | '-6db' | '-10db' | '-12db'
 
 interface LoudnessConfig {
     preset: LoudnessPreset
@@ -15,27 +15,27 @@ interface LoudnessConfig {
 }
 
 const LOUDNESS_CONFIGS: Record<LoudnessPreset, LoudnessConfig> = {
-    '-8db': {
-        preset: '-8db',
-        integrated: -8,  // Maximum loudness
+    '-3db': {
+        preset: '-3db',
+        integrated: -3,  // Maximum loudness
+        truePeak: -1.5,
+        lra: 11,
+    },
+    '-6db': {
+        preset: '-6db',
+        integrated: -6,  // Strong loudness
         truePeak: -1.5,
         lra: 11,
     },
     '-10db': {
         preset: '-10db',
-        integrated: -10,  // Strong loudness
-        truePeak: -1.5,
+        integrated: -10,  // Normal loudness
+        truePeak: -2,
         lra: 11,
     },
     '-12db': {
         preset: '-12db',
-        integrated: -12,  // Standard streaming loudness
-        truePeak: -2,
-        lra: 11,
-    },
-    '-16db': {
-        preset: '-16db',
-        integrated: -16,  // Moderate loudness
+        integrated: -12,  // Moderate loudness
         truePeak: -2.5,
         lra: 11,
     },
